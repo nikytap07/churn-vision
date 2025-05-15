@@ -16,11 +16,12 @@
 
 ## 🛠️ Стек технологий
 
-- Frontend: React.js + TailwindCSS
-- Backend: FastAPI / Flask
-- ML: scikit-learn, pandas, XGBoost
-- DB: PostgreSQL
-- Деплой: Vercel / Render / Heroku
+- **Интерфейс:** Streamlit
+- **Анализ данных:** Pandas, NumPy, Seaborn
+- **ML:** scikit-learn, SHAP, XGBoost
+- **Хранение данных:** 	CSV-файлы, (в перспективе: SQLite/PostgreSQL)
+- **Визуализация:** 	Plotly, Matplotlib
+- **Деплой:** 	Streamlit CLI / Streamlit Cloud
 
 ## 🚀 Запуск проекта
 
