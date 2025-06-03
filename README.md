@@ -181,7 +181,7 @@ _![Пример обучения](./docs/screenshots/train_success.png)_
    - `prediction` — 1 (уйдёт), 0 (останется);
    - `probability` — вероятность оттока.
 
-📸 _![Предсказания](./docs/screenshots/predictions_input.png)_
+📸 _![Предсказания](./docs/screenshots/prediction_input.png)_
 
 ---
 
@@ -194,4 +194,4 @@ _![Пример обучения](./docs/screenshots/train_success.png)_
 
 Файл с результатами можно скачать в формате `.csv` по кнопке **"📥 Скачать результат"**.
 
-📸 _![Предсказания](./docs/screenshots/predictions_output.png)_
+📸 _![Предсказания](./docs/screenshots/prediction_output.png)_
