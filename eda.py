@@ -1,3 +1,4 @@
+import math
 import streamlit as st
 import pandas as pd
 import numpy as np
@@ -60,9 +61,29 @@ def run_eda(df, options):
 
     if "Гистограммы признаков" in options:
         st.subheader("Гистограммы признаков")
-        st.markdown("Распределения числовых признаков с нормальной кривой KDE")
-        df.hist(bins=50, edgecolor='black', linewidth=2, alpha=0.72, figsize=(15, 15))
-        st.pyplot(plt.gcf())
+        st.markdown("📊 Распределения числовых признаков с кривой плотности (KDE)")
+
+        sns.set(style="whitegrid", palette="Set2", font_scale=1.05)
+        num_cols = df.select_dtypes(include='number').columns
+        n_cols = 3
+        n_rows = math.ceil(len(num_cols) / n_cols)
+
+        fig, axes = plt.subplots(n_rows, n_cols, figsize=(n_cols * 5, n_rows * 4))
+        axes = axes.flatten()
+
+        for i, col in enumerate(num_cols):
+            sns.histplot(df[col].dropna(), kde=True, bins=30,
+                         ax=axes[i], color="#4C72B0", edgecolor="white", linewidth=1.5)
+            axes[i].set_title(col, fontsize=12)
+            axes[i].set_xlabel("")
+            axes[i].set_ylabel("")
+
+        # Удалим лишние пустые графики
+        for j in range(i + 1, len(axes)):
+            fig.delaxes(axes[j])
+
+        plt.tight_layout()
+        st.pyplot(fig)
 
     if "QQ-графики" in options:
         st.subheader("QQ-графики")
