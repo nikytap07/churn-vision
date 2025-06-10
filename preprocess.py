@@ -7,7 +7,7 @@ NUM_FEATURES = [
     'age',
     'avg_additional_charges_total',
     'lifetime',
-    'avg_class_frequency_total',
+        'avg_class_frequency_total',
     'month_to_end_contract',
     'avg_class_frequency_current_month'
 ]

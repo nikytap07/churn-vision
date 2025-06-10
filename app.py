@@ -6,6 +6,10 @@ from eda import run_eda
 from preprocess import preprocess_data
 from model import train_and_save_model, visualize_model, load_model_and_scaler, run_prediction
 import os
+from clustering import run_clustering, plot_churn_by_cluster, plot_categorical_distributions, run_hierarchical_clustering
+
+from preprocess import get_feature_groups
+import os
 from sklearn.metrics import confusion_matrix
 
 st.set_page_config(
@@ -16,11 +20,11 @@ st.set_page_config(
 
 st.title("ChurnVision: EDA, Обучение и Предсказания")
 
-tab1, tab2 = st.tabs(["📊 Анализ и обучение", "🔮 Предсказания"])
+tab1, tab2, tab3 = st.tabs(["\U0001F4CA Анализ и обучение", "\U0001F52E Предсказания", "\U0001F465 Кластеризация"])
 
 # ---------- TAB 1: EDA и обучение ----------
 with tab1:
-    st.subheader("📁 Загрузка обучающего файла")
+    st.subheader("\U0001F4C1 Загрузка обучающего файла")
     uploaded = st.file_uploader("Загрузите CSV или Excel файл", type=["csv", "xlsx"], key="train")
 
     do_eda = st.sidebar.checkbox("Выполнить EDA", value=True)
@@ -59,20 +63,20 @@ with tab1:
         if 'churn' not in df.columns:
             st.error("Файл не содержит колонку 'churn'. EDA будет выполнен без обучения модели.")
             if do_eda:
-                st.header("Exploratory Data Analysis (EDA) 🔍")
+                st.header("Exploratory Data Analysis (EDA) \U0001F50D")
                 run_eda(df, eda_options)
         else:
             X_train, X_test, y_train, y_test = preprocess_data(df, target_column='churn')
 
-            st.success("✅ Предобработка завершена")
+            st.success("\u2705 Предобработка завершена")
             st.write("Размерность X_train:", X_train.shape)
 
             if do_eda:
-                st.header("Exploratory Data Analysis (EDA) 🔍")
+                st.header("Exploratory Data Analysis (EDA) \U0001F50D")
                 run_eda(df, eda_options)
 
             if st.button("Обучить и сохранить модель"):
-                st.info("⏳ Обучение модели...")
+                st.info("\u23F3 Обучение модели...")
 
                 model_name = selected_model
                 if selected_model == "Logistic Regression (balanced)":
@@ -82,16 +86,16 @@ with tab1:
                     X_train, X_test, y_train, y_test, model_name=model_name
                 )
 
-                st.success(f"🎯 Модель {selected_model} успешно обучена и сохранена!")
+                st.success(f"\U0001F3AF Модель {selected_model} успешно обучена и сохранена!")
 
-                st.subheader("📌 Метрики качества")
+                st.subheader("\U0001F4CC Метрики качества")
                 for k, v in metrics.items():
                     st.write(f"**{k}:** {v:.3f}")
 
                 st.session_state.all_model_metrics[selected_model] = metrics
                 visualize_model(models, X_test_scaled, y_test, scaler)
 
-                st.subheader("🔍 Матрица ошибок (Confusion Matrix)")
+                st.subheader("\U0001F50D Матрица ошибок (Confusion Matrix)")
                 cm = confusion_matrix(y_test, y_pred)
                 fig, ax = plt.subplots(figsize=(6, 4))
                 sns.heatmap(cm, annot=True, fmt='d', cmap='Blues', ax=ax)
@@ -101,7 +105,7 @@ with tab1:
                 st.pyplot(fig)
 
             if st.session_state.all_model_metrics:
-                st.subheader("📊 Сравнение моделей по метрикам")
+                st.subheader("\U0001F4CA Сравнение моделей по метрикам")
                 df_metrics = pd.DataFrame(st.session_state.all_model_metrics).T.reset_index().rename(columns={"index": "Model"})
                 st.dataframe(df_metrics.style.format(precision=2))
 
@@ -112,7 +116,7 @@ with tab1:
                 plt.ylim(0.5, 1.0)
                 st.pyplot(plt.gcf())
     else:
-        st.info("⬆ Загрузите файл с клиентскими данными (обязательно с колонкой `churn`)")
+        st.info("\u2B06 Загрузите файл с клиентскими данными (обязательно с колонкой `churn`)")
 
 # ---------- TAB 2: Предсказания ----------
 with tab2:
@@ -133,12 +137,35 @@ with tab2:
             model, scaler = load_model_and_scaler(selected_pkl)
             result = run_prediction(model, scaler, df_pred)
 
-            st.success("✅ Предсказания выполнены")
+            st.success("\u2705 Предсказания выполнены")
             st.dataframe(result)
 
             st.download_button(
-                label="📥 Скачать результат",
+                label="\U0001F4E5 Скачать результат",
                 data=result.to_csv(index=False).encode("utf-8"),
                 file_name="predictions.csv",
                 mime="text/csv"
             )
+
+# ---------- TAB 3: Кластеризация ----------
+with tab3:
+    st.markdown("### 👥 Кластеризация клиентов")
+    n_clusters = st.slider("Выберите количество кластеров", 2, 10, 5)
+
+    if uploaded:
+        df = df.copy() if 'df' in locals() else None
+        df.columns = df.columns.str.lower().str.strip()
+
+        clustered_df = run_clustering(df, n_clusters=n_clusters)
+        plot_churn_by_cluster(clustered_df)
+
+        # plot_cluster_distributions больше не используется
+        # визуализация признаков вынесена внутрь run_clustering()
+
+        categorical, _ = get_feature_groups()
+        plot_categorical_distributions(clustered_df, categorical)
+
+        with st.expander("📌 Иерархическая кластеризация"):
+            run_hierarchical_clustering(df)
+    else:
+        st.warning("Загрузите обучающий файл для кластеризации")
